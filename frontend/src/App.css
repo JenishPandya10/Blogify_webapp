@@ -1,0 +1,127 @@
+/* App.css */
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f6f9; /* Light gray background */
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #2d3436; /* Dark gray */
+  margin-bottom: 20px;
+}
+
+/* Container for the entire login/signup page */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #ffffff; /* White background for the form area */
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 350px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Google login button */
+.google-login-button {
+  width: 100%;
+  background-color: #4285F4; /* Google blue color */
+  color: white;
+  padding: 12px;
+  text-align: center;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.google-login-button:hover {
+  background-color: #357ae8; /* Darker blue for hover */
+}
+
+/* Form fields and inputs */
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 20px;
+}
+
+form label {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+}
+
+form input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+form input:focus {
+  border-color: #3498db; /* Blue focus color */
+  outline: none;
+}
+
+/* Submit button */
+form button {
+  background-color: #3498db; /* LinkedIn-like blue */
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* Bottom link and footer */
+p {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+p a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* Link styles */
+.login-container .login-link {
+  font-size: 14px;
+  text-align: center;
+  color: #3498db;
+}
+
+.login-container .login-link:hover {
+  text-decoration: underline;
+}
