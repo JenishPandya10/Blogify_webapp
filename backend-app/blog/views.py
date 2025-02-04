@@ -7,7 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from social_django.utils import load_strategy
 from social_core.backends.google import GoogleOAuth2
 from social_core.exceptions import AuthException
-from django.conf import settings
+from rest_framework import generics
+from .models import Post
+from .serializers import PostSerializer
 
 User = get_user_model()
 
@@ -81,3 +83,7 @@ class GoogleLoginView(APIView):
 
         except AuthException:
             return Response({'error': 'Invalid Google token'}, status=status.HTTP_400_BAD_REQUEST)
+
+class PostListView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
