@@ -18,24 +18,28 @@ GOOGLE_CLIENT_SECRET = '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'
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'blog',
-    'corsheaders',  # CORS headers for frontend-backend interaction
-    'rest_framework',
-    'rest_framework.authtoken',  # Required for Token-based authentication
-    'dj_rest_auth',  # Django Rest Auth for authentication
-    'dj_rest_auth.registration',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'social_django',
-    'rest_framework_simplejwt',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    
+    "blog",  # Your app
+
+    "corsheaders",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
+
+    # Authentication
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",  # ✅ Enable Google login
+    "social_django",
 ]
 
 MIDDLEWARE = [
@@ -155,10 +159,11 @@ TEMPLATES = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-    'social_core.backends.google.GoogleOAuth2',  # Only keep this if social-auth-app-django is installed
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+    "social_core.backends.google.GoogleOAuth2",  # Ensure this is installed
 )
+
 
 # Google OAuth2 Settings
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CLIENT_ID
@@ -180,3 +185,12 @@ SITE_ID = 1
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# DJOSER = {
+#     "LOGIN_FIELD": "email",
+#     "USER_CREATE_PASSWORD_RETYPE": True,
+#     "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
+#     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+#     "SEND_ACTIVATION_EMAIL": False,
+#     "SEND_CONFIRMATION_EMAIL": False,
+# }
