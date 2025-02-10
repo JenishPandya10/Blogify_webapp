@@ -15,7 +15,7 @@ const Login = () => {
 
     // Simulate login logic (replace with actual backend authentication)
     if (email === 'test@example.com' && password === 'password123') {
-      navigate('/dashboard'); // Redirect on successful login
+      navigate('/'); // Redirect on successful login
     } else {
       setError('Invalid email or password.');
     }

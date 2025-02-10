@@ -1,18 +1,21 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, generics
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from social_django.utils import load_strategy
 from social_core.backends.google import GoogleOAuth2
 from social_core.exceptions import AuthException
-from rest_framework import generics
-from .models import Post
-from .serializers import PostSerializer
+from rest_framework.decorators import api_view, permission_classes
+
+from .serializers import PostSerializer, BlogSerializer
+
 
 User = get_user_model()
 
+
+# User Registration View
 class UserRegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -30,6 +33,8 @@ class UserRegisterView(APIView):
         user = User.objects.create_user(email=email, username=username, password=password)
         return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
 
+
+# User Login View
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -55,6 +60,8 @@ class UserLoginView(APIView):
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+# Google Login View
 class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -67,9 +74,9 @@ class GoogleLoginView(APIView):
             strategy = load_strategy(request)
             backend = GoogleOAuth2(strategy=strategy)
             user_data = backend.get_user_details(token)
-            
+
             user, created = User.objects.get_or_create(email=user_data['email'], defaults={'username': user_data['fullname']})
-            
+
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
@@ -84,6 +91,25 @@ class GoogleLoginView(APIView):
         except AuthException:
             return Response({'error': 'Invalid Google token'}, status=status.HTTP_400_BAD_REQUEST)
 
-class PostListView(generics.ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+
+# Blog Post List View
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Blog
+from .serializers import BlogSerializer
+
+class CreateBlogView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        title = request.data.get('title')
+        content = request.data.get('content')
+        category = request.data.get('category')
+
+        if not title or not content or not category:
+            return Response({'error': 'All fields are required'}, status=400)
+
+        blog = Blog.objects.create(user=user, title=title, content=content, category=category)
+        return Response({'message': 'Blog created successfully!', 'blog': BlogSerializer(blog).data}, status=201)
