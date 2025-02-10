@@ -1,33 +1,14 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
-
-
-
-class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=150, unique=True)
-
-    groups = models.ManyToManyField(Group, related_name="customuser_groups", blank=True)
-    user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions", blank=True)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
-
-# Post model linked to the custom user model
-from django.db import models
+from django.contrib.auth.models import User  # Use Django's default User model
 
 class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.title
-    
-from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()  # Ensure compatibility with custom user models
 
 class Blog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link blog to user
@@ -38,7 +19,6 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.title
-
 
 
 

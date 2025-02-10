@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../Home.css";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/blogs/")
@@ -12,39 +14,63 @@ const Home = () => {
       .then((data) => setBlogs(data))
       .catch((err) => console.log(err));
 
-    // Check user authentication status
+    // Check authentication
     const token = localStorage.getItem("access_token");
-    if (token) setIsAuthenticated(true);
+    if (token) {
+      setIsAuthenticated(true);
+      fetchUserData(token);
+    }
   }, []);
+
+  const fetchUserData = async (token) => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/user/", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      } else {
+        console.log("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.log("Error fetching user:", error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     setIsAuthenticated(false);
-    window.location.href = "/login"; // Redirect to login after logout
+    setUser(null);
+    navigate("/login");
+    window.location.reload(); // Ensure navbar updates after logout
   };
 
   return (
     <div className="home-container">
-      {/* Navbar */}
       <header className="navbar">
         <h1 className="logo">Blogify</h1>
         <input type="text" placeholder="Search" className="search-bar" />
 
         <div className="nav-buttons">
-          {isAuthenticated ? (
+          {isAuthenticated && user ? (
             <>
+              <span className="profile-name">Hello, {user.username}!</span>
               <Link to="/profile" className="profile-btn">Profile</Link>
               <button onClick={handleLogout} className="logout-btn">Logout</button>
             </>
           ) : (
             <Link to="/login" className="login-btn">Login</Link>
           )}
-          <Link to="/create-blog" className="write-btn">Write</Link>
+          {isAuthenticated && (
+            <Link to="/create-blog" className="write-btn">Write</Link>
+          )}
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="main-content">
         <section className="blog-list">
           {blogs.length > 0 ? (
@@ -60,16 +86,6 @@ const Home = () => {
             <p>Loading blogs...</p>
           )}
         </section>
-
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <h3>Staff Picks</h3>
-          <ul>
-            <li>A Comprehensive Review of Rolling Stone’s ‘500 Greatest Albums of All Time’</li>
-            <li>Notes on Twee</li>
-            <li>As a New Manager, I Thought Everything Was an Emergency</li>
-          </ul>
-        </aside>
       </main>
     </div>
   );

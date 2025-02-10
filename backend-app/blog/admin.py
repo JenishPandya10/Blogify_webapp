@@ -1,21 +1,18 @@
 from django.contrib import admin
-from .models import CustomUser #CustomUser, Profile, Post, Comment, Category, Tag, Like ,
+from .models import Blog, Post  # Import only existing models
 
-# admin.site.register(CustomUser)
-# admin.site.register(Profile)
-# admin.site.register(Post)
-# admin.site.register(Comment)
-# admin.site.register(Category)
-# admin.site.register(Tag)
-# admin.site.register(Like)
+# Register Blog model
+class BlogAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'category', 'created_at')  # Fields to display
+    search_fields = ('title', 'category', 'user__username')  # Enable search
+    list_filter = ('category', 'created_at')  # Add filters
 
+# Register Post model
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at', 'updated_at')
+    search_fields = ('title', 'content')
+    list_filter = ('created_at',)
 
-
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'date_joined')  # Customize the fields shown in the list
-    search_fields = ('email', 'username')  # Enable search by email or username
-
-admin.site.register(CustomUser, CustomUserAdmin)
-
-
-# Register your models here.
+# Register models in Django admin
+admin.site.register(Blog, BlogAdmin)
+admin.site.register(Post, PostAdmin)
