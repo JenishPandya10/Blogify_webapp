@@ -5,7 +5,7 @@ import "../Auth.css"; // Import CSS file
 
 const Login = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState(""); // Changed from email to username
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,18 +19,27 @@ const Login = () => {
       const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }), // Changed to username instead of email
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
+      console.log("Login Response:", response);
+      console.log("Response Data:", data);
+
       if (response.ok) {
-        localStorage.setItem("access_token", data.access);
-        localStorage.setItem("refresh_token", data.refresh);
-        navigate("/"); // Redirect to homepage after login
+        if (data.access && data.refresh) {
+          localStorage.setItem("access_token", data.access);
+          localStorage.setItem("refresh_token", data.refresh);
+          navigate("/"); // Redirect to homepage after login
+          window.location.reload(); // Ensure navbar updates after login
+        } else {
+          setError("Invalid server response. No access token received.");
+        }
       } else {
         setError(data.detail || "Invalid username or password.");
       }
     } catch (error) {
+      console.error("Login Error:", error);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -39,7 +48,7 @@ const Login = () => {
 
   const handleGoogleLoginSuccess = (response) => {
     console.log("Google Login Success:", response);
-    // Send token to backend for authentication (if implemented)
+    // Implement backend verification of Google token if needed
     navigate("/");
   };
 

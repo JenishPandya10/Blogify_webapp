@@ -34,31 +34,32 @@ class UserRegisterView(APIView):
         return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
 
 
-# User Login View
-class UserLoginView(APIView):
-    permission_classes = [AllowAny]
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate, get_user_model
 
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+User = get_user_model()
 
-        if not email or not password:
-            return Response({'error': 'Both email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def login_view(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
 
-        user = User.objects.filter(email=email).first()
-        if user and user.check_password(password):
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'username': user.username
-                }
-            }, status=status.HTTP_200_OK)
+    if not email or not password:
+        return Response({"error": "Email and password are required"}, status=400)
 
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    # Authenticate with custom backend
+    user = authenticate(username=email, password=password)
+
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }, status=200)
+
+    return Response({"error": "Invalid credentials"}, status=400)
 
 
 # Google Login View

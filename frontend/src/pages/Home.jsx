@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../Home.css";
 
@@ -8,21 +8,24 @@ const Home = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/blogs/")
-      .then((res) => res.json())
-      .then((data) => setBlogs(data))
-      .catch((err) => console.log(err));
+  // Logout function
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setIsAuthenticated(false);
+    setUser(null);
+    navigate("/login");
+    window.location.reload();
+  }, [navigate]);
 
-    // Check authentication
+  // Fetch user data
+  const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("access_token");
-    if (token) {
-      setIsAuthenticated(true);
-      fetchUserData(token);
+    if (!token) {
+      setIsAuthenticated(false);
+      return;
     }
-  }, []);
 
-  const fetchUserData = async (token) => {
     try {
       const response = await fetch("http://127.0.0.1:8000/api/auth/user/", {
         method: "GET",
@@ -32,22 +35,25 @@ const Home = () => {
       if (response.ok) {
         const data = await response.json();
         setUser(data);
+        setIsAuthenticated(true); // ✅ Now setting authentication state correctly
       } else {
-        console.log("Failed to fetch user data");
+        handleLogout();
       }
     } catch (error) {
       console.log("Error fetching user:", error);
+      handleLogout();
     }
-  };
+  }, [handleLogout]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    setIsAuthenticated(false);
-    setUser(null);
-    navigate("/login");
-    window.location.reload(); // Ensure navbar updates after logout
-  };
+  // Fetch blogs & check authentication on page load
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/blogs/")
+      .then((res) => res.json())
+      .then((data) => setBlogs(data))
+      .catch((err) => console.log(err));
+
+    fetchUserData(); // ✅ Ensures authentication state updates correctly
+  }, [fetchUserData]);
 
   return (
     <div className="home-container">
