@@ -147,6 +147,12 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+DJ_REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "access_token",   # Optional: Store token in cookies
+    "JWT_AUTH_REFRESH_COOKIE": "refresh_token",
+}
+
 SITE_ID = 1
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"

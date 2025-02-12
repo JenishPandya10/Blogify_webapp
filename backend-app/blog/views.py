@@ -49,8 +49,14 @@ def login_view(request):
     if not email or not password:
         return Response({"error": "Email and password are required"}, status=400)
 
-    # Authenticate with custom backend
-    user = authenticate(username=email, password=password)
+    # ✅ Fetch user by email (since Django default is username)
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "Invalid credentials"}, status=400)
+
+    # ✅ Authenticate with the correct username field
+    user = authenticate(username=user.username, password=password)
 
     if user:
         refresh = RefreshToken.for_user(user)
@@ -60,7 +66,6 @@ def login_view(request):
         }, status=200)
 
     return Response({"error": "Invalid credentials"}, status=400)
-
 
 # Google Login View
 class GoogleLoginView(APIView):
