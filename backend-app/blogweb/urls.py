@@ -3,5 +3,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),  # Django Admin Panel
-    path("api/", include("blog.urls")),  # Include your blog app's URLs
+    path("api/", include("blog.urls")),  # Include all routes from blog.urls
 ]
