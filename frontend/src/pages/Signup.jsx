@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "../Auth.css"; // Use same CSS for Login & Signup
 
 const Signup = () => {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,16 +19,19 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/registration/", {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/signup/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ email, password }),
       });
+
+      const data = await response.json();
+      console.log("Signup Response:", data);
 
       if (response.ok) {
         navigate("/login"); // Redirect to login after successful signup
       } else {
-        setError("Signup failed. Try again.");
+        setError(data.detail || "Signup failed. Try again.");
       }
     } catch (error) {
       setError("Something went wrong. Please try again.");
@@ -41,13 +43,6 @@ const Signup = () => {
       <h2>Sign Up</h2>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSignup}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
         <input
           type="email"
           placeholder="Email"

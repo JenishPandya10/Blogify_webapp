@@ -61,6 +61,9 @@ REST_USE_JWT = True
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication"
+        
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -83,6 +86,10 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_PATH": "/",
     "AUTH_COOKIE_SAMESITE": "Lax",
 }
+
+
+
+
 
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
@@ -138,6 +145,7 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = (
     "blog.auth_backends.EmailBackend",  # ✅ Custom Email Authentication
     "django.contrib.auth.backends.ModelBackend",  # Default Authentication
+    "allauth.account.auth_backends.AuthenticationBackend"
 )
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -156,3 +164,6 @@ DJ_REST_AUTH = {
 SITE_ID = 1
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+
+AUTH_USER_MODEL = "blog.CustomUser"

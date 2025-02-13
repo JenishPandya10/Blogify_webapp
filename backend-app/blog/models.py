@@ -1,6 +1,19 @@
 from django.db import models
-from django.contrib.auth.models import User  # Use Django's default User model
+from django.conf import settings  # For AUTH_USER_MODEL
+from django.contrib.auth.models import AbstractUser
 
+# ✅ Define CustomUser FIRST
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)  # Email as the primary field
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+
+    USERNAME_FIELD = 'email'  # Login with email instead of username
+    REQUIRED_FIELDS = ['username']  # Keep username required but not primary
+
+    def __str__(self):
+        return self.email
+
+# ✅ Now define other models
 class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -11,7 +24,7 @@ class Post(models.Model):
         return self.title
 
 class Blog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link blog to user
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ✅ Uses CustomUser
     title = models.CharField(max_length=255)
     content = models.TextField()
     category = models.CharField(max_length=100)
@@ -19,8 +32,6 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.title
-
-
 
 # from django.contrib.auth.models import AbstractUser
 # from django.db import models

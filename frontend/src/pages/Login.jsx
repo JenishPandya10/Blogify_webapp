@@ -1,42 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
-import "../Auth.css"; // Import CSS file
+import { GoogleLogin } from "@react-oauth/google"; // Import Google Login
 
 const Login = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); // Changed username to email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Handle normal login
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError(""); 
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/login/", { // ✅ Fixed URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }), // Changed username to email
       });
 
       const data = await response.json();
-      console.log("Login Response:", response);
-      console.log("Response Data:", data);
-
       if (response.ok) {
-        if (data.access && data.refresh) {
-          localStorage.setItem("access_token", data.access);
-          localStorage.setItem("refresh_token", data.refresh);
-          navigate("/"); // Redirect to homepage after login
-          window.location.reload(); // Ensure navbar updates after login
-        } else {
-          setError("Invalid server response. No access token received.");
-        }
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        navigate("/");  
+        window.location.reload();
       } else {
-        setError(data.detail || "Invalid username or password.");
+        setError(data.error || "Invalid email or password.");
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -46,15 +39,44 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLoginSuccess = (response) => {
+  // ✅ Handle Google Login Success
+  const handleGoogleLoginSuccess = async (response) => {
     console.log("Google Login Success:", response);
-    // Implement backend verification of Google token if needed
-    navigate("/");
+
+    if (!response.credential) {
+      console.error("Google token is missing");
+      setError("Google token is missing.");
+      return;
+    }
+
+    try {
+      const backendResponse = await fetch("http://127.0.0.1:8000/api/auth/google-login/", { // ✅ Fixed URL
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+
+      const data = await backendResponse.json();
+      console.log("Backend Response:", data);
+
+      if (backendResponse.ok) {
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        navigate("/");
+        window.location.reload();
+      } else {
+        setError(data.error || "Google login failed.");
+      }
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      setError("Something went wrong.");
+    }
   };
 
+  // ✅ Handle Google Login Failure
   const handleGoogleLoginFailure = (error) => {
     console.error("Google Login Error:", error);
-    setError("Google login failed.");
+    setError("Google login failed. Please try again.");
   };
 
   return (
@@ -63,14 +85,15 @@ const Login = () => {
         <h2>Sign In</h2>
         {error && <p className="error-message">{error}</p>}
 
+        {/* 🔹 Normal Login Form */}
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Username</label>
+            <label>Email</label> {/* Changed Username to Email */}
             <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -91,13 +114,10 @@ const Login = () => {
           </button>
         </form>
 
+        {/* 🔹 Google Login Button */}
         <div className="google-login">
           <p>Or login with</p>
-          <GoogleLogin
-            onSuccess={handleGoogleLoginSuccess}
-            onError={handleGoogleLoginFailure}
-            disabled={loading}
-          />
+          <GoogleLogin onSuccess={handleGoogleLoginSuccess} onError={handleGoogleLoginFailure} />
         </div>
 
         <p className="auth-link">
@@ -107,6 +127,5 @@ const Login = () => {
     </div>
   );
 };
-
 
 export default Login;
