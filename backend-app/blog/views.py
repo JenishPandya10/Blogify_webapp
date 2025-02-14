@@ -7,31 +7,39 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from google.auth.transport import requests
 from google.oauth2 import id_token
+from django.contrib.auth.hashers import make_password, check_password
 from .serializers import BlogSerializer
-from .models import Blog
+from .models import Blog, CustomUser
 
 User = get_user_model()
 
 @api_view(["POST"])
 def signup_view(request):
-    email = request.data.get("email")
-    username = request.data.get("username")
-    password = request.data.get("password")
+    data = request.data
+    email = data.get("email")
+    password = data.get("password")
+    confirm_password = data.get("confirm_password")
 
-    if not email or not username or not password:
-        return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
+    if not email or not password or not confirm_password:
+        return Response({"error": "All fields are required"}, status=400)
 
-    if User.objects.filter(email=email).exists():
-        return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    if password != confirm_password:
+        return Response({"error": "Passwords do not match"}, status=400)
 
-    if User.objects.filter(username=username).exists():
-        return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    if CustomUser.objects.filter(email=email).exists():
+        return Response({"error": "User already exists"}, status=400)
 
-    user = User.objects.create_user(email=email, username=username, password=password)
-    return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+    try:
+        # ✅ Use `create_user()` to handle password hashing
+        user = CustomUser.objects.create_user(email=email, password=password)
+        return Response({"message": "User registered successfully"}, status=201)
+
+    except Exception as e:
+        return Response({"error": "Something went wrong", "details": str(e)}, status=500)
 
 
-# ✅ User Login View (Fixed)
+
+# ✅ Login View (Fixed)
 @api_view(["POST"])
 def login_view(request):
     email = request.data.get("email")
@@ -40,26 +48,25 @@ def login_view(request):
     if not email or not password:
         return Response({"error": "Email and password are required"}, status=400)
 
-    # ✅ Get user by email (because Django default authentication uses username)
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
         return Response({"error": "Invalid credentials"}, status=400)
 
-    # ✅ Authenticate using username
-    user = authenticate(username=user.username, password=password)
+    # ✅ Check password manually
+    if not check_password(password, user.password):
+        return Response({"error": "Invalid credentials"}, status=400)
 
-    if user:
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-            },
-            status=200,
-        )
+    # ✅ Generate JWT tokens
+    refresh = RefreshToken.for_user(user)
 
-    return Response({"error": "Invalid credentials"}, status=400)
+    return Response(
+        {
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        },
+        status=200,
+    )
 
 
 # ✅ Google Login View (Fixed)
@@ -71,17 +78,14 @@ def google_login(request):
         return Response({"error": "Token is required"}, status=400)
 
     try:
-        # ✅ Replace with your actual Google Client ID
         client_id = "846204416661-ojdh7p7938c8qo7oep54p3tojc5ltld7.apps.googleusercontent.com"
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
 
         email = idinfo.get("email")
         name = idinfo.get("name")
 
-        # ✅ Get or create user
         user, created = User.objects.get_or_create(email=email, defaults={"username": name})
 
-        # ✅ Generate JWT token
         refresh = RefreshToken.for_user(user)
 
         return Response(

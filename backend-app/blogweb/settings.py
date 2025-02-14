@@ -53,7 +53,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]  # React frontend URL
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+
 
 # ✅ Use JWT in dj-rest-auth
 REST_USE_JWT = True
