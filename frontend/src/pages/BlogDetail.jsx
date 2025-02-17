@@ -13,6 +13,7 @@ const BlogDetail = () => {
   }, [id]);
 
   if (!blog) return <p>Loading...</p>;
+  
 
   return (
     <div>

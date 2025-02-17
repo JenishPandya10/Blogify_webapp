@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Blog, Post, CustomUser  # ✅ Import CustomUser
+from .models import Blog, CustomUser  # ✅ Removed Post import
 
 # ✅ Register CustomUser
 @admin.register(CustomUser)
@@ -11,13 +11,5 @@ class CustomUserAdmin(admin.ModelAdmin):
 # ✅ Register Blog model
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'category', 'created_at')
-    search_fields = ('title', 'category', 'user__email')  # Use 'user__email' for CustomUser
-    list_filter = ('category', 'created_at')
-
-# ✅ Register Post model
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at', 'updated_at')
-    search_fields = ('title', 'content')
-    list_filter = ('created_at',)
+    list_display = ('title', 'user', 'created_at')
+    search_fields = ('title', 'user__email')  

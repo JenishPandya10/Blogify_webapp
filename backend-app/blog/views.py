@@ -1,3 +1,4 @@
+# views.py
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -30,7 +31,6 @@ def signup_view(request):
         return Response({"error": "User already exists"}, status=400)
 
     try:
-        # ✅ Use `create_user()` to handle password hashing
         user = CustomUser.objects.create_user(email=email, password=password)
         return Response({"message": "User registered successfully"}, status=201)
 
@@ -38,8 +38,6 @@ def signup_view(request):
         return Response({"error": "Something went wrong", "details": str(e)}, status=500)
 
 
-
-# ✅ Login View (Fixed)
 @api_view(["POST"])
 def login_view(request):
     email = request.data.get("email")
@@ -53,11 +51,9 @@ def login_view(request):
     except User.DoesNotExist:
         return Response({"error": "Invalid credentials"}, status=400)
 
-    # ✅ Check password manually
     if not check_password(password, user.password):
         return Response({"error": "Invalid credentials"}, status=400)
 
-    # ✅ Generate JWT tokens
     refresh = RefreshToken.for_user(user)
 
     return Response(
@@ -69,10 +65,9 @@ def login_view(request):
     )
 
 
-# ✅ Google Login View (Fixed)
 @api_view(["POST"])
 def google_login(request):
-    token = request.data.get("credential")  # Get Google token from frontend
+    token = request.data.get("credential")
 
     if not token:
         return Response({"error": "Token is required"}, status=400)
@@ -101,7 +96,7 @@ def google_login(request):
         return Response({"error": "Invalid Google token", "details": str(e)}, status=400)
 
 
-# ✅ Create Blog View (Fixed)
+# ✅ Fixed Create Blog View (Removed `category`)
 class CreateBlogView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -109,10 +104,19 @@ class CreateBlogView(APIView):
         user = request.user
         title = request.data.get("title")
         content = request.data.get("content")
-        category = request.data.get("category")
 
-        if not title or not content or not category:
-            return Response({"error": "All fields are required"}, status=400)
+        if not title or not content:
+            return Response({"error": "Title and content are required"}, status=400)
 
-        blog = Blog.objects.create(user=user, title=title, content=content, category=category)
+        blog = Blog.objects.create(user=user, title=title, content=content)
         return Response({"message": "Blog created successfully!", "blog": BlogSerializer(blog).data}, status=201)
+
+
+from rest_framework.generics import ListAPIView
+from .models import Blog
+from .serializers import BlogSerializer
+
+class BlogListView(ListAPIView):
+    queryset = Blog.objects.all().order_by("-created_at")
+    serializer_class = BlogSerializer
+    permission_classes = [AllowAny]

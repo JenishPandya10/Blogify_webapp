@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../CreateBlog.css';
 
-const CreateBlog = () => {
+const CreateBlog = ({ addBlogInstantly }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
@@ -13,11 +12,11 @@ const CreateBlog = () => {
         const token = localStorage.getItem('access');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/blogs/create/', {
-                method: 'POST',
+            const response = await fetch("http://127.0.0.1:8000/api/blogs/create/", { 
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({ title, content }),
             });
@@ -25,12 +24,13 @@ const CreateBlog = () => {
             const data = await response.json();
             if (response.ok) {
                 alert('Blog created successfully!');
+                addBlogInstantly(data); // Add new blog to Home without reloading
                 navigate('/');
             } else {
                 setError(data.error || 'Failed to create blog');
             }
         } catch (error) {
-            setError('Something went wrong. Try again.');
+            setError('Something went wrong. Please try again.');
         }
     };
 
@@ -40,21 +40,25 @@ const CreateBlog = () => {
                 <button className="publish-btn" onClick={handleSubmit}>Publish</button>
             </div>
             {error && <p className="error-message">{error}</p>}
-            <div className="editor">
-                <input 
-                    type="text" 
-                    className="title-input" 
-                    placeholder="Title" 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-                <textarea 
-                    className="content-input" 
-                    placeholder="Tell your story..." 
-                    value={content} 
-                    onChange={(e) => setContent(e.target.value)}
-                />
-            </div>
+            <form onSubmit={handleSubmit}>
+                <div className="editor">
+                    <input 
+                        type="text" 
+                        className="title-input" 
+                        placeholder="Title" 
+                        value={title} 
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
+                    <textarea 
+                        className="content-input" 
+                        placeholder="Tell your story..." 
+                        value={content} 
+                        onChange={(e) => setContent(e.target.value)}
+                        required
+                    />
+                </div>
+            </form>
         </div>
     );
 };

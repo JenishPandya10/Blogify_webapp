@@ -50,10 +50,10 @@ const Login = () => {
     }
 
     try {
-      const backendResponse = await fetch("http://127.0.0.1:8000/api/auth/google-login/", { // ✅ Fixed URL
+      const backendResponse = await fetch("http://127.0.0.1:8000/auth/google-login/", { // ✅ Fixed URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: response.credential }),
+        body: JSON.stringify({ credential: response.credential }), // Send Google token as 'credential'
       });
 
       const data = await backendResponse.json();
@@ -69,7 +69,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Google Login Error:", error);
-      setError("Something went wrong.");
+      setError("Something went wrong during Google login.");
     }
   };
 
@@ -95,7 +95,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-            />
+            />  
           </div>
 
           <div className="input-group">
